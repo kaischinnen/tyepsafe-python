@@ -1,12 +1,23 @@
 import os
+from collections.abc import Mapping
 from types import TracebackType
-from typing import Self
+from typing import Self, TypeVar, overload
 
 import httpx2
+from pydantic import BaseModel
 
-from collections.abc import Mapping
+from typesafe_sdk import (
+    Choice,
+    JSONContent,
+    JSONValue,
+    Noul,
+    RetryPolicy,
+    TypeSafeClient,
+)
 
-from typesafe_sdk import JSONContent, JSONValue, Noul, RetryPolicy, TypeSafeClient
+
+ResponseT = TypeVar("ResponseT", bound=BaseModel)
+
 
 class JevLib:
     def __init__(
@@ -99,3 +110,80 @@ class JevLib:
         )
 
         return result.nouls["feels"].noul
+
+    @overload
+    def match(
+        self,
+        state: JSONContent,
+        question: JSONContent,
+        criteria: Mapping[str, JSONContent | None],
+        *,
+        model: str | None = None,
+        retry: RetryPolicy | None = None,
+        timeout: float | httpx2.Timeout | None = None,
+        extra_headers: Mapping[str, str] | None = None,
+        extra_body: Mapping[str, JSONValue | None] | None = None,
+        response_model: None = None,
+    ) -> str: ...
+
+    @overload
+    def match(
+        self,
+        state: JSONContent,
+        question: JSONContent,
+        criteria: Mapping[str, JSONContent | None],
+        *,
+        model: str | None = None,
+        retry: RetryPolicy | None = None,
+        timeout: float | httpx2.Timeout | None = None,
+        extra_headers: Mapping[str, str] | None = None,
+        extra_body: Mapping[str, JSONValue | None] | None = None,
+        response_model: type[ResponseT],
+    ) -> ResponseT: ...
+
+    def match(
+        self,
+        state: JSONContent,
+        question: JSONContent,
+        criteria: Mapping[str, JSONContent | None],
+        *,
+        model: str | None = None,
+        retry: RetryPolicy | None = None,
+        timeout: float | httpx2.Timeout | None = None,
+        extra_headers: Mapping[str, str] | None = None,
+        extra_body: Mapping[str, JSONValue | None] | None = None,
+        response_model: type[ResponseT] | None = None,
+    ) -> str | ResponseT:
+        """Select the criterion that best matches ``state``.
+
+        The selected criterion name is returned by default. When ``response_model``
+        is supplied, the custom parsed response is returned unchanged.
+        """
+        questions = {
+            "match": Choice(instructions=question, criteria=criteria),
+        }
+
+        if response_model is not None:
+            return self.client.system_one(
+                state,
+                questions,
+                model=model,
+                retry=retry,
+                timeout=timeout,
+                extra_headers=extra_headers,
+                extra_body=extra_body,
+                response_model=response_model,
+            )
+
+        result = self.client.system_one(
+            state,
+            questions,
+            model=model,
+            retry=retry,
+            timeout=timeout,
+            extra_headers=extra_headers,
+            extra_body=extra_body,
+            response_model=None,
+        )
+
+        return result.choices["match"].choice
