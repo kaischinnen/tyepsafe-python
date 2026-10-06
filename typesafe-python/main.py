@@ -12,6 +12,7 @@ from typesafe_sdk import (
     JSONValue,
     Noul,
     RetryPolicy,
+    TypeSafeAPIError,
     TypeSafeClient,
 )
 
@@ -97,17 +98,21 @@ class JevLib:
         extra_headers: Mapping[str, str] | None = None,
         extra_body: Mapping[str, JSONValue | None] | None = None,
     ) -> float:
-        result = self.client.system_one(
-            state,
-            {
-                "feels": Noul(instructions=question),
-            },
-            model=model,
-            retry=retry,
-            timeout=timeout,
-            extra_headers=extra_headers,
-            extra_body=extra_body,
-        )
+        try:
+            result = self.client.system_one(
+                state,
+                {
+                    "feels": Noul(instructions=question),
+                },
+                model=model,
+                retry=retry,
+                timeout=timeout,
+                extra_headers=extra_headers,
+                extra_body=extra_body,
+            )
+        except TypeSafeAPIError as error:
+            print(error.status, error.request_id)
+            raise
 
         return result.nouls["feels"].noul
 
@@ -163,8 +168,20 @@ class JevLib:
             "match": Choice(instructions=question, criteria=criteria),
         }
 
-        if response_model is not None:
-            return self.client.system_one(
+        try:
+            if response_model is not None:
+                return self.client.system_one(
+                    state,
+                    questions,
+                    model=model,
+                    retry=retry,
+                    timeout=timeout,
+                    extra_headers=extra_headers,
+                    extra_body=extra_body,
+                    response_model=response_model,
+                )
+
+            result = self.client.system_one(
                 state,
                 questions,
                 model=model,
@@ -172,18 +189,10 @@ class JevLib:
                 timeout=timeout,
                 extra_headers=extra_headers,
                 extra_body=extra_body,
-                response_model=response_model,
+                response_model=None,
             )
-
-        result = self.client.system_one(
-            state,
-            questions,
-            model=model,
-            retry=retry,
-            timeout=timeout,
-            extra_headers=extra_headers,
-            extra_body=extra_body,
-            response_model=None,
-        )
+        except TypeSafeAPIError as error:
+            print(error.status, error.request_id)
+            raise
 
         return result.choices["match"].choice
