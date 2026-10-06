@@ -1,7 +1,13 @@
+
 # typesafe-python
 
-**typesafe-python** is an unofficial Python wrapper around the TypeSafe/Jev SDK.
+**A typed Python interface for semantic decisions with TypeSafe System One.**
 
-Its goal is to provide a simpler, more expressive API for common semantic operations.
+[![Tests](https://github.com/kaischinnen/TypeSafe-Wrapper/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/kaischinnen/TypeSafe-Wrapper/actions/workflows/tests.yml)
+![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
+![Status: Experimental](https://img.shields.io/badge/status-experimental-F59E0B)
 
-> **⚠️ Important:** This project is still under development and the API may change at any time.
+</div>
+
+> [!WARNING]
+> This project is experimental, unofficial, and under active development.
