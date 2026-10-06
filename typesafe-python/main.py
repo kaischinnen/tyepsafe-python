@@ -6,6 +6,8 @@ from typing import Self, TypeVar, overload
 import httpx2
 from pydantic import BaseModel
 
+from pathlib import Path
+
 from typesafe_sdk import (
     Choice,
     JSONContent,
@@ -67,7 +69,7 @@ class JevLib:
         base_url: str | None = None,
     ) -> None:
         self.client = TypeSafeClient(
-            api_key=self.TYPESAFE_API_KEY,
+            api_key=self.API_KEY,
             model=model,
             retry=retry,
             timeout=timeout,
@@ -77,13 +79,15 @@ class JevLib:
             base_url=base_url,
         )
 
-    def setup_api_key(self, api_key: str | None = None) -> None:
-        if api_key is not None:
-            self.TYPESAFE_API_KEY = api_key
+    def setup_api_key(self, api_key_environ: str | None = None) -> None:
+        if api_key_environ is not None:
+            self.API_KEY = os.environ[f"{api_key_environ}"]
+            # print(f"Using API key from environment variable: {api_key_environ}")
             return
 
         try:
-            self.TYPESAFE_API_KEY = os.environ["TYPESAFE_API_KEY"]
+            self.API_KEY = os.environ["TYPESAFE_API_KEY"]
+            # print(f"2: Using API key from environment variable: {api_key_environ}")
         except KeyError:
             raise RuntimeError("Missing required environment variable: $TYPESAFE_API_KEY") from None
 

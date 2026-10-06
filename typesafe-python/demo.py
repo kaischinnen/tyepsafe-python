@@ -24,22 +24,12 @@ def run_match(jl: JevLib) -> None:
 
     team = jl.match(state, instructions, teams)
 
-    detailled_call = jl.match(
-        state,
-        instructions,
-        teams,
-        model="jev-latest",
-        retry=None,
-        timeout=5.0,
-        extra_headers={"x-trace-id": "match-demo"},
-        extra_body={"metadata": {"source": "demo"}},
-    )
     print(f"Route to: {team}")
 
 
 def main() -> None:
     try:
-        with JevLib() as jl:
+        with JevLib(api_key="") as jl:
             print("JevLib initialized successfully.")
             run_feel(jl)
 

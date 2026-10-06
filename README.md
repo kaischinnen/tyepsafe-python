@@ -7,7 +7,5 @@
 ![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white)
 ![Status: Experimental](https://img.shields.io/badge/status-experimental-F59E0B)
 
-</div>
-
 > [!WARNING]
 > This project is experimental, unofficial, and under active development.
